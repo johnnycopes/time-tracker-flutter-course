@@ -5,14 +5,14 @@ class CustomElevatedButton extends StatelessWidget {
   final Color color;
   final double height;
   final double borderRadius;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   CustomElevatedButton({
     required this.child,
     required this.color,
-    required this.onPressed,
     this.height: 48.0,
     this.borderRadius: 4.0,
+    this.onPressed,
   });
 
   @override

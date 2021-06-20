@@ -6,14 +6,14 @@ class SocialSignInButton extends StatelessWidget {
   final String assetName;
   final Color color;
   final Color textColor;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   SocialSignInButton({
     required this.text,
     required this.assetName,
     required this.color,
     required this.textColor,
-    required this.onPressed,
+    this.onPressed,
   });
 
   @override

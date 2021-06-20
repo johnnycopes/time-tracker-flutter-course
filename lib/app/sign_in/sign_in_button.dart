@@ -5,23 +5,24 @@ class SignInButton extends StatelessWidget {
   final String text;
   final Color color;
   final Color textColor;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   SignInButton({
     required this.text,
     required this.color,
     required this.textColor,
-    required this.onPressed,
+    this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
     return CustomElevatedButton(
-        child: Text(
-          text,
-          style: TextStyle(color: textColor, fontSize: 16.0),
-        ),
-        color: color,
-        onPressed: onPressed);
+      child: Text(
+        text,
+        style: TextStyle(color: textColor, fontSize: 16.0),
+      ),
+      color: color,
+      onPressed: onPressed,
+    );
   }
 }
