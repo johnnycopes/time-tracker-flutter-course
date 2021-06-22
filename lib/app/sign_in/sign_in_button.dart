@@ -7,12 +7,13 @@ class SignInButton extends StatelessWidget {
   final Color textColor;
   final VoidCallback? onPressed;
 
-  SignInButton({
+  const SignInButton({
+    Key? key,
     required this.text,
     required this.color,
     required this.textColor,
     this.onPressed,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
