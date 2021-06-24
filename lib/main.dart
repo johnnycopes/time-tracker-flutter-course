@@ -16,6 +16,7 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   bool _initialized = false;
   bool _error = false;
+  Widget? home;
 
   Future<void> initializeFlutterFire() async {
     try {
@@ -44,8 +45,14 @@ class _AppState extends State<App> {
     }
 
     if (!_initialized) {
-      // return Loading();
-      print("loading");
+      print("here?");
+      home = Container(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      home = LandingPage(
+        auth: Auth(),
+      );
     }
 
     return MaterialApp(
@@ -53,9 +60,7 @@ class _AppState extends State<App> {
       theme: ThemeData(
         primarySwatch: Colors.indigo,
       ),
-      home: LandingPage(
-        auth: Auth(),
-      ),
+      home: home,
     );
   }
 }
