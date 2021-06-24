@@ -19,8 +19,7 @@ class _AppState extends State<App> {
 
   Future<void> initializeFlutterFire() async {
     try {
-      final myApp = await Firebase.initializeApp();
-      print(myApp);
+      await Firebase.initializeApp();
       setState(() {
         _initialized = true;
       });

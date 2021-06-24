@@ -33,7 +33,6 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("here: $_user");
     if (_user == null) {
       return SignInPage(
         auth: widget.auth,
