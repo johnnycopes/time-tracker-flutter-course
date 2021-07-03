@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:time_tracker_flutter_course/app/sign_in/validators.dart';
 import 'package:time_tracker_flutter_course/common_widgets/form_submit_button.dart';
 import 'package:time_tracker_flutter_course/services/auth.dart';
 
 enum EmailSignInFormType { signIn, register }
 
-class EmailSignInForm extends StatefulWidget {
+class EmailSignInForm extends StatefulWidget with EmailAndPasswordValidators {
   final AuthBase auth;
 
-  const EmailSignInForm({
+  EmailSignInForm({
     Key? key,
     required this.auth,
   }) : super(key: key);
@@ -19,6 +20,8 @@ class EmailSignInForm extends StatefulWidget {
 class _EmailSignInFormState extends State<EmailSignInForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
 
   String get _email => _emailController.text;
   String get _password => _passwordController.text;
@@ -44,6 +47,10 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
     }
   }
 
+  void _emailEditingComplete() {
+    FocusScope.of(context).requestFocus(_passwordFocusNode);
+  }
+
   void _toggleFormType() {
     setState(() {
       _formType = _formType == EmailSignInFormType.signIn
@@ -54,6 +61,10 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
     _passwordController.clear();
   }
 
+  void _updateState() {
+    setState(() {});
+  }
+
   List<Widget> _buildChildren() {
     final primaryText = _formType == EmailSignInFormType.signIn
         ? 'Sign In'
@@ -61,28 +72,18 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
     final secondaryText = _formType == EmailSignInFormType.signIn
         ? 'Need an account? Register'
         : 'Have an account? Sign in';
+
+    bool submitEnabled = widget.emailValidator.isValid(_email) &&
+        widget.passwordValidator.isValid(_password);
+
     return [
-      TextField(
-        controller: _emailController,
-        decoration: InputDecoration(
-          labelText: 'Email',
-          hintText: 'test@test.com',
-        ),
-      ),
+      _buildEmailTextField(),
       SizedBox(height: 8.0),
-      TextField(
-        controller: _passwordController,
-        autocorrect: false,
-        enableSuggestions: false,
-        obscureText: true,
-        decoration: InputDecoration(
-          labelText: 'Password',
-        ),
-      ),
+      _buildPasswordTextField(),
       SizedBox(height: 16.0),
       FormSubmitButton(
         text: primaryText,
-        onPressed: _submit,
+        onPressed: submitEnabled ? _submit : null,
       ),
       SizedBox(height: 8.0),
       TextButton(
@@ -90,6 +91,44 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
         onPressed: _toggleFormType,
       ),
     ];
+  }
+
+  Widget _buildEmailTextField() {
+    bool emailValid = widget.emailValidator.isValid(_email);
+    return TextField(
+      controller: _emailController,
+      focusNode: _emailFocusNode,
+      autocorrect: false,
+      enableSuggestions: false,
+      keyboardType: TextInputType.emailAddress,
+      textInputAction: TextInputAction.next,
+      onChanged: (email) => _updateState(),
+      onEditingComplete: _emailEditingComplete,
+      decoration: InputDecoration(
+        labelText: 'Email',
+        hintText: 'test@test.com',
+        errorText: emailValid ? null : widget.invalidEmailErrorText,
+      ),
+    );
+  }
+
+  Widget _buildPasswordTextField() {
+    bool passwordValid = widget.passwordValidator.isValid(_password);
+    return TextField(
+      controller: _passwordController,
+      focusNode: _passwordFocusNode,
+      autocorrect: false,
+      enableSuggestions: false,
+      keyboardType: TextInputType.visiblePassword,
+      textInputAction: TextInputAction.done,
+      obscureText: true,
+      onChanged: (password) => _updateState(),
+      onEditingComplete: _submit,
+      decoration: InputDecoration(
+        labelText: 'Password',
+        errorText: passwordValid ? null : widget.invalidPasswordErrorText,
+      ),
+    );
   }
 
   @override
