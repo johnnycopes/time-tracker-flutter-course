@@ -7,7 +7,14 @@ import 'package:time_tracker_flutter_course/app/sign_in/social_sign_in_button.da
 import 'package:time_tracker_flutter_course/common_widgets/show_exception_alert_dialog.dart';
 import 'package:time_tracker_flutter_course/services/auth.dart';
 
-class SignInPage extends StatelessWidget {
+class SignInPage extends StatefulWidget {
+  @override
+  _SignInPageState createState() => _SignInPageState();
+}
+
+class _SignInPageState extends State<SignInPage> {
+  bool loading = false;
+
   void _showSignInError(BuildContext context, Exception exception) {
     if (exception is FirebaseException &&
         exception.code == 'ERROR_ABORTED_BY_USER') {
@@ -22,10 +29,13 @@ class SignInPage extends StatelessWidget {
 
   Future<void> _signInAnonymously(BuildContext context) async {
     try {
+      setState(() => loading = true);
       final auth = Provider.of<AuthBase>(context, listen: false);
       await auth.signInAnonymously();
     } on Exception catch (e) {
       _showSignInError(context, e);
+    } finally {
+      setState(() => loading = false);
     }
   }
 
@@ -38,10 +48,13 @@ class SignInPage extends StatelessWidget {
 
   Future<void> _signInWithGoogle(BuildContext context) async {
     try {
+      setState(() => loading = true);
       final auth = Provider.of<AuthBase>(context, listen: false);
       await auth.signInWithGoogle();
     } on Exception catch (e) {
       _showSignInError(context, e);
+    } finally {
+      setState(() => loading = false);
     }
   }
 
@@ -64,12 +77,11 @@ class SignInPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Text(
-            'Sign In',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 32.0,
-              fontWeight: FontWeight.w600,
+          SizedBox(
+            height: 48.0,
+            child: Align(
+              alignment: Alignment.center,
+              child: _buildHeader(),
             ),
           ),
           SizedBox(height: 48.0),
@@ -79,7 +91,7 @@ class SignInPage extends StatelessWidget {
             assetName: 'images/google-logo.png',
             textColor: Colors.black87,
             color: Colors.white,
-            onPressed: () => _signInWithGoogle(context),
+            onPressed: loading ? null : () => _signInWithGoogle(context),
           ),
           SizedBox(height: 8.0),
           // TODO: implement this later
@@ -95,7 +107,7 @@ class SignInPage extends StatelessWidget {
             text: 'Sign in with email',
             textColor: Colors.white,
             color: Colors.teal,
-            onPressed: () => _signInWithEmail(context),
+            onPressed: loading ? null : () => _signInWithEmail(context),
           ),
           SizedBox(height: 8.0),
           Text(
@@ -108,9 +120,25 @@ class SignInPage extends StatelessWidget {
             text: 'Go anonymous',
             textColor: Colors.black,
             color: Colors.lime.shade300,
-            onPressed: () => _signInAnonymously(context),
+            onPressed: loading ? null : () => _signInAnonymously(context),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    if (loading) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    return Text(
+      'Sign In',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 32.0,
+        fontWeight: FontWeight.w600,
       ),
     );
   }
