@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:time_tracker_flutter_course/app/sign_in/email_sign_in_bloc.dart';
 import 'package:time_tracker_flutter_course/app/sign_in/email_sign_in_model.dart';
-import 'package:time_tracker_flutter_course/app/sign_in/validators.dart';
 import 'package:time_tracker_flutter_course/common_widgets/form_submit_button.dart';
 import 'package:time_tracker_flutter_course/common_widgets/show_exception_alert_dialog.dart';
 import 'package:time_tracker_flutter_course/services/auth.dart';
 
-class EmailSignInFormBlocBased extends StatefulWidget {
-  EmailSignInFormBlocBased({
+class EmailSignInForm extends StatefulWidget {
+  EmailSignInForm({
     Key? key,
     required this.bloc,
   }) : super(key: key);
@@ -21,18 +20,17 @@ class EmailSignInFormBlocBased extends StatefulWidget {
     return Provider<EmailSignInBloc>(
       create: (_) => EmailSignInBloc(auth: auth),
       child: Consumer<EmailSignInBloc>(
-        builder: (_, bloc, __) => EmailSignInFormBlocBased(bloc: bloc),
+        builder: (_, bloc, __) => EmailSignInForm(bloc: bloc),
       ),
       dispose: (_, bloc) => bloc.dispose(),
     );
   }
 
   @override
-  _EmailSignInFormBlocBasedState createState() =>
-      _EmailSignInFormBlocBasedState();
+  _EmailSignInFormState createState() => _EmailSignInFormState();
 }
 
-class _EmailSignInFormBlocBasedState extends State<EmailSignInFormBlocBased> {
+class _EmailSignInFormState extends State<EmailSignInForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
