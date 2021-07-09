@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:time_tracker_flutter_course/app/sign_in/email_sign_in_bloc.dart';
 import 'package:time_tracker_flutter_course/app/sign_in/email_sign_in_model.dart';
 import 'package:time_tracker_flutter_course/common_widgets/form_submit_button.dart';
 import 'package:time_tracker_flutter_course/common_widgets/show_exception_alert_dialog.dart';
@@ -10,19 +9,18 @@ import 'package:time_tracker_flutter_course/services/auth.dart';
 class EmailSignInForm extends StatefulWidget {
   EmailSignInForm({
     Key? key,
-    required this.bloc,
+    required this.model,
   }) : super(key: key);
 
-  final EmailSignInBloc bloc;
+  final EmailSignInModel model;
 
   static Widget create(BuildContext context) {
     final auth = Provider.of<AuthBase>(context, listen: false);
-    return Provider<EmailSignInBloc>(
-      create: (_) => EmailSignInBloc(auth: auth),
-      child: Consumer<EmailSignInBloc>(
-        builder: (_, bloc, __) => EmailSignInForm(bloc: bloc),
+    return ChangeNotifierProvider<EmailSignInModel>(
+      create: (_) => EmailSignInModel(auth: auth),
+      child: Consumer<EmailSignInModel>(
+        builder: (_, model, __) => EmailSignInForm(model: model),
       ),
-      dispose: (_, bloc) => bloc.dispose(),
     );
   }
 
@@ -36,6 +34,8 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
+  EmailSignInModel get model => widget.model;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -47,7 +47,7 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
 
   Future<void> _submit() async {
     try {
-      await widget.bloc.submit();
+      await widget.model.submit();
       Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
       showExceptionAlertDialog(
@@ -58,24 +58,24 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
     }
   }
 
-  void _emailEditingComplete(EmailSignInModel model) {
-    final targetFocusNode = model.emailValidator.isValid(model.email)
+  void _emailEditingComplete() {
+    final targetFocusNode = widget.model.emailValidator.isValid(model.email)
         ? _passwordFocusNode
         : _emailFocusNode;
     FocusScope.of(context).requestFocus(targetFocusNode);
   }
 
   void _toggleFormType() {
-    widget.bloc.toggleFormType();
+    model.toggleFormType();
     _emailController.clear();
     _passwordController.clear();
   }
 
-  List<Widget> _buildChildren(EmailSignInModel model) {
+  List<Widget> _buildChildren() {
     return [
-      _buildEmailTextField(model),
+      _buildEmailTextField(),
       SizedBox(height: 8.0),
-      _buildPasswordTextField(model),
+      _buildPasswordTextField(),
       SizedBox(height: 16.0),
       FormSubmitButton(
         text: model.primaryButtonText,
@@ -89,7 +89,7 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
     ];
   }
 
-  Widget _buildEmailTextField(EmailSignInModel model) {
+  Widget _buildEmailTextField() {
     return TextField(
       controller: _emailController,
       focusNode: _emailFocusNode,
@@ -97,8 +97,8 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
       enableSuggestions: false,
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,
-      onChanged: widget.bloc.updateEmail,
-      onEditingComplete: () => _emailEditingComplete(model),
+      onChanged: model.updateEmail,
+      onEditingComplete: _emailEditingComplete,
       decoration: InputDecoration(
         labelText: 'Email',
         hintText: 'test@test.com',
@@ -108,7 +108,7 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
     );
   }
 
-  Widget _buildPasswordTextField(EmailSignInModel model) {
+  Widget _buildPasswordTextField() {
     return TextField(
       controller: _passwordController,
       focusNode: _passwordFocusNode,
@@ -117,7 +117,7 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
       keyboardType: TextInputType.visiblePassword,
       textInputAction: TextInputAction.done,
       obscureText: true,
-      onChanged: widget.bloc.updatePassword,
+      onChanged: model.updatePassword,
       onEditingComplete: _submit,
       decoration: InputDecoration(
         labelText: 'Password',
@@ -129,20 +129,13 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<EmailSignInModel>(
-      stream: widget.bloc.modelStream,
-      initialData: EmailSignInModel(),
-      builder: (context, snapshot) {
-        final EmailSignInModel model = snapshot.data!;
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: _buildChildren(model),
-          ),
-        );
-      },
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: _buildChildren(),
+      ),
     );
   }
 }
